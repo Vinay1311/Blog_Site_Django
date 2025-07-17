@@ -121,8 +121,8 @@ class GetBlogListAPI(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        page_count = request.GET.get('page_count', 10)  # Default to 10 items per page
-        page_number = request.GET.get('page_number', 1)   # Default to page 1
+        page_count = request.GET.get('page_count', 1)  
+        page_number = request.GET.get('page_number', 10)    
         
         paginated_data, pagination_info = pagination(queryset, int(page_count), int(page_number))
         serializer = self.get_serializer(paginated_data, many=True)
@@ -139,8 +139,7 @@ class DeleteBlogAPI(generics.DestroyAPIView):
     Only admin users can delete posts (handled by middleware).
     Uses custom middleware for permission checking.
     """
-    # Using middleware for permission checking instead of DRF permissions
-    # This allows for more granular control over delete operations
+    # permission_classes = [IsAdmin] #Not using permission_classes as we are using middleware
     queryset = BlogPost.objects.all()
     lookup_field = 'id'
     
