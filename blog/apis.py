@@ -1,12 +1,12 @@
 from .models import *
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from master.utils import get_tokens_for_user, pagination
 from helper import keys
-from .permissions import IsAdmin, IsEditorOrAdmin
+from .permissions import IsAdmin, IsEditorOrAdmin, IsReaderOrPublished
 
 # User Authentication APIs
 
@@ -18,14 +18,17 @@ class UserRegisterAPI(generics.CreateAPIView):
     Uses UserSerializer for validation and serialization.
     """
     serializer_class = UserSerializer
-
-    def patch(self, *args, **kwargs):
-        serializer = self.get_serializer(self.request.user, data=self.request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        return Response("User Registered Successfully", status=status.HTTP_200_OK)
-
+    permission_classes = [AllowAny]
+    
+    def post(self, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=self.request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response("User registered successfully", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({keys.ERROR: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserLoginAPI(generics.CreateAPIView):
     """
@@ -35,14 +38,15 @@ class UserLoginAPI(generics.CreateAPIView):
     Uses UserLoginSerializer for validation.
     """
     serializer_class = UserLoginSerializer
+    permission_classes = [AllowAny]
     
     def post(self, *args, **kwargs):
-        serializer = self.get_serializer(data=self.request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user = serializer.validated_data['user']
-        tokens = get_tokens_for_user(user)
-        return Response({keys.DATA: tokens}, status=status.HTTP_200_OK)
+        try:
+            user = User.objects.get(username=self.request.data['username'])
+            tokens = get_tokens_for_user(user)
+            return Response({keys.DATA: tokens}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({keys.ERROR: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # Blog Management APIs
@@ -99,7 +103,7 @@ class GetBlogListAPI(generics.ListAPIView):
     Includes pagination support.
     """
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsReaderOrPublished]
 
     def get_queryset(self):
         queryset = BlogPost.objects.filter(status=keys.PUBLISHED)
@@ -121,8 +125,8 @@ class GetBlogListAPI(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        page_count = request.GET.get('page_count', 1)  
-        page_number = request.GET.get('page_number', 10)    
+        page_count = request.GET.get('page_count', 10)  
+        page_number = request.GET.get('page_number', 1)    
         
         paginated_data, pagination_info = pagination(queryset, int(page_count), int(page_number))
         serializer = self.get_serializer(paginated_data, many=True)

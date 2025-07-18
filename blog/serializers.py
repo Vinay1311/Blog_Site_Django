@@ -7,39 +7,44 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'role']
-        read_only_fields = ['role']
+        # read_only_fields = ['role']
 
 class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['user_name', 'email']
+        fields = ['username', 'email']
 
 class PostSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    category = CategorySerializer()
-    tags = TagSerializer(many=True)
-    
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=MasterCategory.objects.all(), required=False, allow_null=True
+    )
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=MasterTag.objects.all(), many=True, required=False
+    )
+
     class Meta:
         model = BlogPost
-        fields = ['id', 'title', 'content', 'author', 'category', 'tags', 'status', 'published_at']
-    
-    def create(self, validated_data):
-        category_data = validated_data.pop('category', None)
-        category = None
-        if category_data:
-            category, _ = MasterCategory.objects.get_or_create(**category_data)
+        fields = '__all__'
 
-        tag_data = validated_data.pop('tags', None)
-        tags = []
-        if tag_data:
-            for tag in tag_data:
-                tag, _ = MasterTag.objects.get_or_create(**tag)
-                tags.append(tag)
-        
-        post = BlogPost.objects.create(
-            author=self.context['request'].user,
-            category=category,
-            tags=tags,
-            **validated_data
-        )
-        return post
+    def create(self, validated_data):
+        tags_data = validated_data.pop('tags', [])
+        category = validated_data.pop('category', None)
+
+        blog = BlogPost.objects.create(category=category, **validated_data)
+        blog.tags.set(tags_data)
+        return blog
+
+    def update(self, instance, validated_data):
+        tags_data = validated_data.pop('tags', None)
+        category = validated_data.pop('category', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if category is not None:
+            instance.category = category
+        instance.save()
+
+        if tags_data is not None:
+            instance.tags.set(tags_data)
+        return instance

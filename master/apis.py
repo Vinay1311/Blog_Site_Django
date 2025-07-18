@@ -11,11 +11,14 @@ class AddCategoryAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, *args, **kwargs):
-        serializer = self.get_serializer(data=self.request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            serializer = self.get_serializer(data=self.request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({keys.ERROR: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AddTagAPI(generics.CreateAPIView):
     """Add Tag API"""
@@ -23,10 +26,13 @@ class AddTagAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, *args, **kwargs):
-        serializer = self.get_serializer(data=self.request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            serializer = self.get_serializer(data=self.request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({keys.ERROR: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
         

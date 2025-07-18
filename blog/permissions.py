@@ -18,6 +18,8 @@ class IsReaderOrPublished(BasePermission):
         return request.user.is_authenticated and request.user.role in [keys.READER, keys.EDITOR, keys.ADMIN]
 
     def has_object_permission(self, request, view, obj):
-        if request.user.role == keys.READER:
+        if request.user.role in [keys.READER, keys.EDITOR, keys.ADMIN]:
             return obj.status == keys.PUBLISHED
         return True
+
+

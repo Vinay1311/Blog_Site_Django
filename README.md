@@ -8,23 +8,27 @@ Blog Site is a modern blog platform built with Django, showcasing advanced featu
 
 - ✨ **Role-Based Authentication**
   - Admin, Editor, and Reader roles with proper permission management
-  - Custom authentication middleware for role-based access control
+  - JWT authentication with 60-day token lifetime
+  - Custom permission classes for role-based access control
+  - Secure password handling
 
 - 📝 **Blog Management**
   - Create, edit, and delete blog posts
   - Category and tag system for content organization
   - Status management (Draft/Published)
   - Timestamp tracking for posts
+  - Improved error handling with try-except blocks
 
 - 🔍 **Advanced Search & Filtering**
   - Search by title, category, tags, and date
-  - Pagination support for large datasets
+  - Pagination support with configurable page size and count
   - Custom pagination utility
 
 - 🔐 **Security Features**
-  - JWT authentication for API security
+  - JWT authentication with 60-day token lifetime
   - Role-based permissions
   - Secure password handling
+  - Input validation and error handling
 
 ## 🎯 Solution Architecture
 
@@ -114,32 +118,51 @@ python manage.py runserver
 
 ## 📚 API Documentation
 
-All endpoints are documented using:
-- Swagger/OpenAPI documentation
-- Comprehensive Python docstrings
-- Clear request/response examples
-- Detailed error handling
-- Interactive API testing
+All endpoints are documented using Swagger/OpenAPI with detailed descriptions and examples. The API is accessible at `/api/docs/`.
+
+### Authentication
+- **JWT Authentication**
+  - Access Token Lifetime: 60 days
+  - Refresh Token Lifetime: 60 days
+  - Header Format: `Bearer <token>`
+  - **Note**: If you encounter "Unauthenticated" or "Authentication credentials were not provided" errors, ensure the token is prefixed with "Bearer " in the Authorization header.
+
+### API Endpoints
+
+#### User Authentication
+- `POST /api/user/register/` - Register new user
 - `POST /api/user/login/` - User login
 
-### Blog Management
-- `POST /api/post_blog/` - Create new blog post
-- `PATCH /api/edit_blog/<id>/` - Edit blog post
-- `DELETE /api/delete_blog/<id>/` - Delete blog post
-- `GET /api/blog_list/` - List blog posts with pagination
+#### Blog Management
+- `POST /api/post_blog/` - Create new blog post (Admin/Editor only)
+- `GET /api/blog_list/` - List blog posts (Public access)
+- `PATCH /api/edit_blog/<str:id>/` - Edit blog post (Admin/Editor only)
+- `DELETE /api/delete_blog/<str:id>/` - Delete blog post (Admin/Editor only)
 
-## 📝 API Response Format
+#### Tag Management
+- `POST /api/add_tag/` - Add new tag (Admin/Editor only)
 
-All API responses follow this format:
+### Response Format
+
+#### Success Response
 ```json
 {
     "data": [...],
+    "success": true,
     "pagination": {
         "total_pages": X,
         "total_count": Y,
         "page_number": Z,
         "page_count": N
     }
+}
+```
+
+#### Error Response
+```json
+{
+    "error": "Error message",
+    "success": false
 }
 ```
 
@@ -159,11 +182,3 @@ All API responses follow this format:
 - Pagination for large datasets
 - Consistent code style
 - Documentation for all endpoints
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
