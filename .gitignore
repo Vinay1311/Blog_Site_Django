@@ -43,3 +43,37 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# System Files
+.Trash/
+.bash_history
+.codeium/
+.gitconfig
+.ipython/
+.lesshst
+.pgadmin/
+.python_history
+.ssh/
+.viminfo
+.windsurf/
+.zsh_history
+.zsh_sessions/
+
+# Applications and User Directories
+Applications/
+Codenicely/
+Downloads/
+Library/
+Movies/
+Music/
+Pictures/
+Postman/
+Public/
+
+# Error Logs and Build Artifacts
+java_error_in_studio.hprof
+postgresql_17.app.zip
+
+#
+../../venv/
+../
