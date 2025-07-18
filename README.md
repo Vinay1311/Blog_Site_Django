@@ -8,7 +8,7 @@ Blog Site is a modern blog platform built with Django, showcasing advanced featu
 
 - ✨ **Role-Based Authentication**
   - Admin, Editor, and Reader roles with proper permission management
-  - JWT authentication with 60-day token lifetime
+  - JWT authentication with 01-day token lifetime
   - Custom permission classes for role-based access control
   - Secure password handling
 
@@ -25,7 +25,7 @@ Blog Site is a modern blog platform built with Django, showcasing advanced featu
   - Custom pagination utility
 
 - 🔐 **Security Features**
-  - JWT authentication with 60-day token lifetime
+  - JWT authentication with 01-day token lifetime
   - Role-based permissions
   - Secure password handling
   - Input validation and error handling
@@ -122,8 +122,8 @@ All endpoints are documented using Swagger/OpenAPI with detailed descriptions an
 
 ### Authentication
 - **JWT Authentication**
-  - Access Token Lifetime: 60 days
-  - Refresh Token Lifetime: 60 days
+  - Access Token Lifetime: 01 days
+  - Refresh Token Lifetime: 01 days
   - Header Format: `Bearer <token>`
   - **Note**: If you encounter "Unauthenticated" or "Authentication credentials were not provided" errors, ensure the token is prefixed with "Bearer " in the Authorization header.
 
